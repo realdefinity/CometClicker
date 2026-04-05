@@ -1,7 +1,7 @@
 # Blur Auto Clicker
 
 <div align="center">
-    <img src="https://github.com/Blur009/Blur-AutoClicker/blob/main/public/V3.0.0 UI.png" width="600"/>
+    <img src="https://github.com/Blur009/Blur-AutoClicker/blob/main/public/V3.0.0_UI.png" width="600"/>
 </div>
 <p align="center"><em>An accuracy and performance focused auto clicker</em></p>
 
