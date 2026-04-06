@@ -1,3 +1,11 @@
+# v2.0.0 - 18.02.2026 (d.m.y) (just an empty template for me here)
+## ❇️ New Features:
+- Added AUTO UPDATES (this is a big one, I know :3)
+- Added social links in the settings page
+- Added clicker stop reasoning in advanced mode (title turns into whatever reason stopped the clicker)
+## 🔹 Changed:
+- Replaced printl with logging module (not really relevant for uesers)
+  
 # v3.0.0 - 18.04.2026 (d.m.y)
 ## ❇️ New Features:
 1. Mode pages (Simple, Advanced, Macro) to make the UI less cluttered and more user friendly.
