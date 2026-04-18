@@ -8,6 +8,9 @@ import type {
 import { invoke } from "@tauri-apps/api/core";
 import { useEffect, useRef, useState } from "react";
 import { open } from "@tauri-apps/plugin-shell";
+import ConfirmDialog from "../ConfirmDialog";
+
+type PendingAction = "reset-settings" | "clear-stats" | null;
 import {
   DEFAULT_ACCENT_COLOR,
   MAX_PRESETS,
@@ -206,6 +209,8 @@ export default function SettingsPanel({
   onReset,
 }: Props) {
   const [resetting, setResetting] = useState(false);
+  const [resettingStats, setResettingStats] = useState(false);
+  const [pendingAction, setPendingAction] = useState<PendingAction>(null);
   const [stats, setStats] = useState<CumulativeStats | null>(null);
   const [atBottom, setAtBottom] = useState(false);
   const [autostartEnabled, setAutostartEnabled] = useState<boolean | null>(null);
@@ -309,6 +314,30 @@ export default function SettingsPanel({
   const presetLimitReached = settings.presets.length >= MAX_PRESETS;
   const activeEditingPresetId = running ? null : editingPresetId;
   const activeConfirmingDeleteId = running ? null : confirmingDeleteId;
+
+  const handleConfirmResetSettings = async () => {
+    setResetting(true);
+    try {
+      await onReset();
+      setAutostartEnabled(false);
+    } finally {
+      setResetting(false);
+      setPendingAction(null);
+    }
+  };
+
+  const handleConfirmClearStats = async () => {
+    setResettingStats(true);
+    try {
+      const next = await invoke<CumulativeStats>("reset_stats");
+      setStats(next);
+    } catch {
+      // swallow — failure leaves stats unchanged
+    } finally {
+      setResettingStats(false);
+      setPendingAction(null);
+    }
+  };
 
   return (
     <div className="settings-wrapper">
@@ -724,6 +753,24 @@ export default function SettingsPanel({
       <div
         className={`settings-fade ${atBottom ? "settings-fade--hidden" : ""}`}
       ></div>
+      <ConfirmDialog
+        open={pendingAction === "reset-settings"}
+        title="Reset all settings?"
+        message="All inputs, hotkeys, and preferences will return to their defaults. This can't be undone."
+        confirmLabel="Reset"
+        busy={resetting}
+        onConfirm={handleConfirmResetSettings}
+        onCancel={() => setPendingAction(null)}
+      />
+      <ConfirmDialog
+        open={pendingAction === "clear-stats"}
+        title="Clear usage data?"
+        message="Your total clicks, session count, time spent clicking, and CPU averages will be permanently erased."
+        confirmLabel="Clear"
+        busy={resettingStats}
+        onConfirm={handleConfirmClearStats}
+        onCancel={() => setPendingAction(null)}
+      />
     </div>
   );
 }
