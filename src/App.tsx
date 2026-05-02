@@ -18,9 +18,7 @@ import {
   type PresetId,
 } from "./settingsSchema";
 import {
-  APP_VERSION,
   DEFAULT_SETTINGS,
-  type AppInfo,
   type ClickerStatus,
   type Settings,
   clearSavedSettings,
@@ -53,7 +51,7 @@ function getPanelSize(tab: Tab, hasUpdate: boolean) {
   if (tab === "simple") {
     return { width: 650, height: 175 + extra };
   }
-  if (tab === "settings") return { width: 560, height: 720 + extra };
+  if (tab === "settings") return { width: 560, height: 620 + extra };
   if (tab === "zones") return { width: 550, height: 400 + extra };
   return { width: 860, height: 527 + extra };
 }
@@ -94,12 +92,6 @@ const DEFAULT_STATUS: ClickerStatus = {
   activeSequenceIndex: null,
 };
 
-const DEFAULT_APP_INFO: AppInfo = {
-  version: APP_VERSION,
-  updateStatus: "Update checks are disabled in development",
-  screenshotProtectionSupported: false,
-};
-
 type UpdateSettingsOptions = {
   preserveActivePreset?: boolean;
 };
@@ -127,7 +119,6 @@ export default function App() {
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
   const [settingsLoaded, setSettingsLoaded] = useState(false);
   const [status, setStatus] = useState<ClickerStatus>(DEFAULT_STATUS);
-  const [appInfo, setAppInfo] = useState<AppInfo>(DEFAULT_APP_INFO);
   const [updateInfo, setUpdateInfo] = useState<{
     currentVersion: string;
     latestVersion: string;
@@ -465,12 +456,8 @@ export default function App() {
   useEffect(() => {
     let mounted = true;
 
-    void Promise.all([
-      loadSettings(),
-      invoke<AppInfo>("get_app_info"),
-      invoke<ClickerStatus>("get_status"),
-    ])
-      .then(async ([loadedSettings, loadedAppInfo, loadedStatus]) => {
+    void Promise.all([loadSettings(), invoke<ClickerStatus>("get_status")])
+      .then(async ([loadedSettings, loadedStatus]) => {
         if (!mounted) return;
 
         let hydratedSettings = loadedSettings;
@@ -508,7 +495,6 @@ export default function App() {
 
         setTab(hydratedSettings.lastPanel);
         setSettings(hydratedSettings);
-        setAppInfo(loadedAppInfo);
         setStatus(loadedStatus);
         setSettingsLoaded(true);
 
@@ -802,7 +788,6 @@ export default function App() {
               settings={settings}
               update={updateSettings}
               running={status.running}
-              appInfo={appInfo}
               onSavePreset={handleSavePreset}
               onApplyPreset={handleApplyPreset}
               onUpdatePreset={handleUpdatePreset}
